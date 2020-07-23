@@ -1,9 +1,11 @@
 package com.info.demo.dao;
 
+
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 public interface RedisDao<T> {
+
     public void putMap(String redisKey, Object key, T data);
 
     public T getMapAsSingleEntry(String redisKey, Object key);

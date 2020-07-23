@@ -68,5 +68,4 @@ public class RedisDaoImpl<T> implements RedisDao<T> {
 	public boolean deleteValue(String key) {
 		return redisTemplate.delete(key);
 	}
-
 }

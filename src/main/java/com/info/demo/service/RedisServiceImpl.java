@@ -24,6 +24,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 @Service
 public class RedisServiceImpl implements RedisService {
 
+
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 
 	@Autowired
@@ -156,7 +157,7 @@ public class RedisServiceImpl implements RedisService {
 
 	/**
 	 * Added to replace the node value with reference id generated
-	 * 
+	 *
 	 * @param entry
 	 */
 	private void replaceWithId(Map.Entry<String, JsonNode> entry) {
@@ -167,7 +168,7 @@ public class RedisServiceImpl implements RedisService {
 	/**
 	 * Added to persist the child value in redis before replacing the node value
 	 * with reference id generated
-	 * 
+	 *
 	 * @param entry
 	 * @return
 	 */

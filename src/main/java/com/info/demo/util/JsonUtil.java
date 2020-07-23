@@ -23,7 +23,6 @@ public class JsonUtil {
 
 	private  static JsonSchema jsonSchema = null;
 
-	//private static JsonSchema jsonSchema = null;
 	private final static JsonSchemaFactory factory = JsonSchemaFactory.byDefault();
 	
 	public static final String ID = "id_";
@@ -77,10 +76,6 @@ public class JsonUtil {
 		return output;
 	}
 
-	public static JsonNode getRootNode(JsonNode rootNode) {
-		traverse(rootNode, 1);
-		return rootNode;
-	}
 
 	private static void traverse(JsonNode node, int level) {
 		if (node.getNodeType() == JsonNodeType.ARRAY) {
@@ -141,6 +136,7 @@ public class JsonUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
+		System.out.println("nodeFromString used");
         return null;
     }
 	

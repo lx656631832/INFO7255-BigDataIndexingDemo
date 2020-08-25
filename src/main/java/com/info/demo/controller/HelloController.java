@@ -3,6 +3,8 @@ package com.info.demo.controller;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.info.demo.constant.CommonConstants;
+import com.info.demo.service.IndexService;
+import com.info.demo.service.KafkaService;
 import com.info.demo.service.RedisService;
 import com.info.demo.service.TokenService;
 import com.info.demo.util.EtagUtil;
@@ -10,6 +12,7 @@ import com.info.demo.util.JsonUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ReactiveAdapterRegistry;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -34,6 +37,11 @@ public class HelloController {
 
     @Autowired
     private TokenService authorizeService;
+
+    @Autowired
+    private KafkaService kafkaService;
+    @Autowired
+    private IndexService indexService;
 
     @GetMapping("/{object}/{key}")
     public ResponseEntity<String> getValue(@PathVariable String object,
@@ -81,7 +89,7 @@ public class HelloController {
     public ResponseEntity<String> postObject(@PathVariable String object,
                                              HttpEntity<String> input,
                                              @RequestHeader HttpHeaders requestHeader)  {
-
+        System.out.println("Inside POST");
         logger.info("postValue(String object : " + object + " input : " + input.getBody() + " - Start");
 
         if(!requestHeader.containsKey("Authorization")){
@@ -106,11 +114,15 @@ public class HelloController {
             if (redisService.getValue(planId) != null) {
                 return ResponseEntity.status(HttpStatus.CONFLICT).body(" {\"message\": \"A object already exisits with the id: " + planId + "\" }");
             }
+            System.out.println(rootNode.toString());
+            indexService.indexObject(rootNode, null,null,rootNode.get("objectId").textValue());
 
             redisService.traverseInput(rootNode);
             redisService.postValue(planId, rootNode.toString());
 
-            return ResponseEntity.status(HttpStatus.CREATED).headers(responseHeader).body(" {\"message\": \"Created data with key: " + planId + "\" }");
+
+
+            return ResponseEntity.status(HttpStatus.CREATED).headers(responseHeader).body(" {\"objectId: " + planId + "\n" + "\"objectType\": \"plan\"" +"\"}");
 
         } else {
             logger.info("postValue(String object : " + object + " input : " + input.getBody() + " - End");
@@ -144,6 +156,9 @@ public class HelloController {
         for (String id : childIdSet) {
             deleteSuccess = redisService.deleteValue(id);
         }
+
+        //Enqueue the data in kafka
+        kafkaService.publish(objectId, "delete");
 
         if (deleteSuccess)
             return new ResponseEntity<>(" {\"message\": \"Deleted\" }", HttpStatus.OK);

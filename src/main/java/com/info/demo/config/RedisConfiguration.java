@@ -12,11 +12,19 @@ import org.springframework.web.filter.ShallowEtagHeaderFilter;
 
 import javax.servlet.Filter;
 
+import static redis.clients.jedis.HostAndPort.localhost;
+
 @Configuration
 public class RedisConfiguration {
     @Bean
     public JedisConnectionFactory redisConnectionFactory() {
         //RedisStandaloneConfiguration config = new RedisStandaloneConfiguration("localhost", 6379);
+//        JedisConnectionFactory factory = new JedisConnectionFactory();
+//        factory.setHostName("localhost");
+//        factory.setPort(6379);
+//        factory.setUsePool(true);
+//        factory.getPoolConfig().setMaxIdle(30);
+//        factory.getPoolConfig().setMinIdle(10);
         return new JedisConnectionFactory();
     }
 
@@ -27,24 +35,26 @@ public class RedisConfiguration {
         template.setKeySerializer(new StringRedisSerializer());
         template.setHashValueSerializer(new GenericToStringSerializer<Object>(Object.class));
         template.setValueSerializer(new GenericToStringSerializer<Object>(Object.class));
+        //demo2
+        //template.setEnableTransactionSupport(true);
         return template;
     }
 
     //demo2
-//    @Bean(name = "etagFilter")
-//    public javax.servlet.Filter shallowEtagHeaderFilter() {
-//        return new ShallowEtagHeaderFilter();
-//    }
-//
-//    @Bean
-//    public FilterRegistrationBean<javax.servlet.Filter> ftreg() {
-//        final FilterRegistrationBean<Filter> fr = new FilterRegistrationBean<>();
-//        fr.setFilter(shallowEtagHeaderFilter());
-//        fr.addUrlPatterns("/*");
-//        fr.setName("etagFilter");
-//        fr.setOrder(1);
-//        return fr;
-//    }
+    @Bean(name = "etagFilter")
+    public javax.servlet.Filter shallowEtagHeaderFilter() {
+        return new ShallowEtagHeaderFilter();
+    }
+
+    @Bean
+    public FilterRegistrationBean<javax.servlet.Filter> ftreg() {
+        final FilterRegistrationBean<Filter> fr = new FilterRegistrationBean<>();
+        fr.setFilter(shallowEtagHeaderFilter());
+        fr.addUrlPatterns("/*");
+        fr.setName("etagFilter");
+        fr.setOrder(1);
+        return fr;
+    }
     //demo2
 
 }
